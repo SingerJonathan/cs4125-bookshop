@@ -1,40 +1,51 @@
 package StaffUI;
 
-import StaffControls.CreateAccountControl;
-import UICommon.ThreadedCurrentTime;
+import Customers.Customer;
+import DBInterface.DBHandler;
+import DBInterface.DBHandlerFactory;
+import StaffControls.EditCustomerControl;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.*;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.*;
+import UICommon.ThreadedCurrentTime;
 
-public class CreateAccount extends JFrame implements ActionListener {
+public class EditCustomer extends JFrame implements ActionListener {
 
+    private DBHandler db = DBHandlerFactory.getDBHandler("Staff");
+    private int customerCount = db.countAllCustomers();
     private JButton jbtBack;
-    private JButton jbtCreateAccount;
+    private JButton jbtEditCustomer;
     private JPanel menu;
     private JPanel buttons;
-    private JPanel Personaldetails;
+    private JPanel Persondetails;
     private JLabel jlblTime;
     private JLabel jlblDate;
     private JPanel jpnlTime;
     private JLabel jlblDate2;
     private JPanel TimeDate;
     private String Date;
-    private JLabel Name;
-    private JLabel Email;
-    private JLabel Membership;
+    private JLabel NName;
+    private JLabel EName;
+    private JLabel MName;
     private JTextField N;
     private JTextField E;
     private JTextField M;
-    private int level = 1;
-    private String userName;
 
-    public CreateAccount(String userName) {
+    private JScrollPane listScroller;
+    private Vector<String> CustomerList = new Vector<>();
+    private JList list;
+    private String choice;
+    private String userName;
+    private String pattern = "[0-9]+";
+
+    public EditCustomer(String userName) {
         this.userName = userName;
-        this.setTitle("Create Account");
+        this.setTitle("Edit Customer Details");
         this.setBounds(100, 100, 500, 300);
-        this.setPreferredSize(new Dimension(500, 500));
+        this.setPreferredSize(new Dimension(600, 600));
         this.setLayout(new GridLayout(2, 1));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBackground(new Color(59, 89, 182));
@@ -48,18 +59,17 @@ public class CreateAccount extends JFrame implements ActionListener {
 
         menu = new JPanel();
         menu.setBounds(new Rectangle(100, 100));
-        menu.setLayout(new GridLayout(2, 1));
+        menu.setLayout(new GridLayout(3, 1));
 
         buttons = new JPanel();
         buttons.setBounds(new Rectangle(10, 10));
         buttons.setLayout(new GridLayout(1, 2));
 
-        Personaldetails = new JPanel();
-        Personaldetails.setBounds(new Rectangle(10, 10));
-
-        Personaldetails.setLayout(new GridLayout(3, 2));
-        Personaldetails.setBackground(new Color(59, 89, 182));
-        Personaldetails.setForeground(Color.WHITE);
+        Persondetails = new JPanel();
+        Persondetails.setBounds(new Rectangle(10, 10));
+        Persondetails.setLayout(new GridLayout(3, 2));
+        Persondetails.setBackground(new Color(59, 89, 182));
+        Persondetails.setForeground(Color.WHITE);
 
         jlblTime = new JLabel("Current Time: ", SwingConstants.CENTER);
         jlblTime.setSize(40, 40);
@@ -91,28 +101,28 @@ public class CreateAccount extends JFrame implements ActionListener {
         jbtBack.setForeground(Color.WHITE);
         jbtBack.setToolTipText("Click to go back to main menu");
 
-        jbtCreateAccount = new JButton("Create Account");
-        jbtCreateAccount.setPreferredSize(new Dimension(100, 100));
-        jbtCreateAccount.addActionListener(this);
-        jbtCreateAccount.setBackground(new Color(59, 89, 182));
-        jbtCreateAccount.setForeground(Color.WHITE);
-        jbtCreateAccount.setToolTipText("Click to create a new account");
-        jbtCreateAccount.setEnabled(false);
+        jbtEditCustomer = new JButton("Save Changes");
+        jbtEditCustomer.setPreferredSize(new Dimension(100, 100));
+        jbtEditCustomer.addActionListener(this);
+        jbtEditCustomer.setBackground(new Color(59, 89, 182));
+        jbtEditCustomer.setForeground(Color.WHITE);
+        jbtEditCustomer.setToolTipText("Click to edit customers in the database");
+        jbtEditCustomer.setEnabled(false);
 
-        Name = new JLabel("Enter Name: ", SwingConstants.CENTER);
-        Name.setSize(40, 40);
-        Name.setBackground(new Color(59, 89, 182));
-        Name.setForeground(Color.WHITE);
+        NName = new JLabel("Enter Name: ", SwingConstants.CENTER);
+        NName.setSize(40, 40);
+        NName.setBackground(new Color(59, 89, 182));
+        NName.setForeground(Color.WHITE);
 
-        Email = new JLabel("Enter Email: ", SwingConstants.CENTER);
-        Email.setSize(40, 40);
-        Email.setBackground(new Color(59, 89, 182));
-        Email.setForeground(Color.WHITE);
+        EName = new JLabel("Enter Email: ", SwingConstants.CENTER);
+        EName.setSize(40, 40);
+        EName.setBackground(new Color(59, 89, 182));
+        EName.setForeground(Color.WHITE);
 
-        Membership = new JLabel("Enter Membership: ", SwingConstants.CENTER);
-        Membership.setSize(40, 40);
-        Membership.setBackground(new Color(59, 89, 182));
-        Membership.setForeground(Color.WHITE);
+        MName = new JLabel("Enter Membership: ", SwingConstants.CENTER);
+        MName.setSize(40, 40);
+        MName.setBackground(new Color(59, 89, 182));
+        MName.setForeground(Color.WHITE);
 
         N = new JTextField(20);
         N.setSize(40, 40);
@@ -132,26 +142,79 @@ public class CreateAccount extends JFrame implements ActionListener {
         M.setForeground(Color.WHITE);
         M.setHorizontalAlignment(SwingConstants.CENTER);
 
+        for (int i = 1; i <= customerCount; i++) {
+            Customer customer = db.getCustomer(i);
+            if (!customer.getName().matches("")) {
+                CustomerList.add(customer.getName());
+            }
+        }
+        Collections.sort(CustomerList);
+
+        list = new JList(CustomerList);
+        list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        list.setVisibleRowCount(CustomerList.size());
+        list.setBackground(new Color(59, 89, 182));
+        list.setForeground(Color.WHITE);
+        listScroller = new JScrollPane(list);
+        listScroller.setPreferredSize(new Dimension(250, 80));
+
         TimeDate.add(jlblTime);
         TimeDate.add(jpnlTime);
         TimeDate.add(jlblDate);
         TimeDate.add(jlblDate2);
 
-        buttons.add(jbtCreateAccount);
+        buttons.add(jbtEditCustomer);
         buttons.add(jbtBack);
 
-        Personaldetails.add(Name);
-        Personaldetails.add(N);
-        Personaldetails.add(Email);
-        Personaldetails.add(E);
-        Personaldetails.add(Membership);
-        Personaldetails.add(M);
+        Persondetails.add(NName);
+        Persondetails.add(N);
+        Persondetails.add(EName);
+        Persondetails.add(E);
+        Persondetails.add(MName);
+        Persondetails.add(M);
 
         menu.add(TimeDate);
         menu.add(buttons);
+        menu.add(listScroller);
 
         this.add(menu);
-        this.add(Personaldetails);
+        this.add(Persondetails);
+
+        list.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting() == false) {
+                    if (list.getSelectedIndex() == -1/* && choice ==-1*/) {
+                        //No selection.
+                        jbtEditCustomer.setEnabled(false);
+                    } else {
+                        //Selection.
+                        jbtEditCustomer.setEnabled(true);
+                        choice = list.getSelectedValue().toString();
+                        Customer customer = db.getCustomer(choice);
+                        int membership = customer.getMemship();
+                        String memString = "";
+                        switch (membership) {
+                            case 1:
+                                memString = "bronze";
+                                break;
+                            case 2:
+                                memString = "silver";
+                                break;
+                            case 3:
+                                memString = "gold";
+                                break;
+                            default:
+                                memString = "0";
+                                break;
+                        }
+                        N.setText(customer.getName());
+                        E.setText(customer.getEmail());
+                        M.setText(memString);
+                    }
+                }
+            }
+        });
 
         N.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -162,19 +225,6 @@ public class CreateAccount extends JFrame implements ActionListener {
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 N.setForeground(Color.WHITE);
                 N.setBackground(new Color(59, 89, 182));
-            }
-        }
-        );
-
-        E.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                E.setForeground(Color.BLACK);
-                E.setBackground(Color.WHITE);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                E.setForeground(Color.WHITE);
-                E.setBackground(new Color(59, 89, 182));
             }
         }
         );
@@ -192,6 +242,19 @@ public class CreateAccount extends JFrame implements ActionListener {
         }
         );
 
+        E.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                E.setForeground(Color.BLACK);
+                E.setBackground(Color.WHITE);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                E.setForeground(Color.WHITE);
+                E.setBackground(new Color(59, 89, 182));
+            }
+        }
+        );
+
         jbtBack.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 jbtBack.setBackground(Color.BLACK);
@@ -203,13 +266,13 @@ public class CreateAccount extends JFrame implements ActionListener {
         }
         );
 
-        jbtCreateAccount.addMouseListener(new java.awt.event.MouseAdapter() {
+        jbtEditCustomer.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                jbtCreateAccount.setBackground(Color.BLACK);
+                jbtEditCustomer.setBackground(Color.BLACK);
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                jbtCreateAccount.setBackground(new Color(59, 89, 182));
+                jbtEditCustomer.setBackground(new Color(59, 89, 182));
             }
         }
         );
@@ -217,19 +280,9 @@ public class CreateAccount extends JFrame implements ActionListener {
         N.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) { //watch for key strokes
                 if (N.getText().length() == 0) {
-                    jbtCreateAccount.setEnabled(false);
+                    jbtEditCustomer.setEnabled(false);
                 } else {
-                    jbtCreateAccount.setEnabled(true);
-                }
-            }
-        });
-
-        E.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent e) { //watch for key strokes
-                if (E.getText().length() == 0) {
-                    jbtCreateAccount.setEnabled(false);
-                } else {
-                    jbtCreateAccount.setEnabled(true);
+                    jbtEditCustomer.setEnabled(true);
                 }
             }
         });
@@ -237,9 +290,19 @@ public class CreateAccount extends JFrame implements ActionListener {
         M.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) { //watch for key strokes
                 if (M.getText().length() == 0) {
-                    jbtCreateAccount.setEnabled(false);
+                    jbtEditCustomer.setEnabled(false);
                 } else {
-                    jbtCreateAccount.setEnabled(true);
+                    jbtEditCustomer.setEnabled(true);
+                }
+            }
+        });
+
+        E.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) { //watch for key strokes
+                if (E.getText().length() == 0) {
+                    jbtEditCustomer.setEnabled(false);
+                } else {
+                    jbtEditCustomer.setEnabled(true);
                 }
             }
         });
@@ -256,7 +319,7 @@ public class CreateAccount extends JFrame implements ActionListener {
             this.setVisible(false);
         }
 
-        if (source.equals(jbtCreateAccount)) {
+        if (source.equals(jbtEditCustomer)) {
             int membership = 0;
             String name = N.getText();
             String email = E.getText();
@@ -274,8 +337,8 @@ public class CreateAccount extends JFrame implements ActionListener {
                     break;
             }
 
-            CreateAccountControl createAccountObject = new CreateAccountControl();
-            createAccountObject.createAccount(name, email, membership);
+            EditCustomerControl editCustomerObject = new EditCustomerControl();
+            editCustomerObject.editCustomer(db.getCustomer(choice).getID(), name, email, membership);
             ManageCustomerMenu mcmenu = new ManageCustomerMenu(userName);
             this.setVisible(false);
         }

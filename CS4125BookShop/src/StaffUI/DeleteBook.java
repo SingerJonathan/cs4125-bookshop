@@ -1,6 +1,7 @@
 package StaffUI;
 
 import DBInterface.DBHandler;
+import DBInterface.DBHandlerFactory;
 import Orders.Book;
 import StaffControls.DeleteBookControl;
 import java.awt.*;
@@ -11,9 +12,9 @@ import javax.swing.*;
 import javax.swing.event.*;
 import UICommon.ThreadedCurrentTime;
 
-public class DeleteBook extends JFrame implements ActionListener
-{
-    private DBHandler db = new DBHandler();
+public class DeleteBook extends JFrame implements ActionListener {
+
+    private DBHandler db = DBHandlerFactory.getDBHandler("Staff");
     private int bookCount = db.countAllBooks();
     private JButton jbtBack;
     private JButton jbtDeleteBook;
@@ -29,46 +30,44 @@ public class DeleteBook extends JFrame implements ActionListener
     private Vector<String> Books = new Vector<>();
     private JList list;
     private String choice;
+    private String userName;
 
-    public DeleteBook()
-    {
+    public DeleteBook(String userName) {
+        this.userName = userName;
         this.setTitle("Delete Book");
-        this.setBounds(100,100,500,300);
-        this.setPreferredSize(new Dimension(500,500));
-        this.setLayout(new GridLayout(1,1));
+        this.setBounds(100, 100, 500, 300);
+        this.setPreferredSize(new Dimension(500, 500));
+        this.setLayout(new GridLayout(1, 1));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBackground(new Color(59, 89, 182));
 
         TimeDate = new JPanel();
-        TimeDate.setBounds(new Rectangle(500,500));
+        TimeDate.setBounds(new Rectangle(500, 500));
         TimeDate.setSize(100, 100);
-        TimeDate.setLayout(new GridLayout(1,4));
+        TimeDate.setLayout(new GridLayout(1, 4));
         TimeDate.setBackground(new Color(59, 89, 182));
         TimeDate.setForeground(Color.WHITE);
 
         menu = new JPanel();
-        menu.setBounds(new Rectangle(100,100));
-        menu.setLayout(new GridLayout(3,1));
+        menu.setBounds(new Rectangle(100, 100));
+        menu.setLayout(new GridLayout(3, 1));
 
         buttons = new JPanel();
-        buttons.setBounds(new Rectangle(10,10));
-        buttons.setLayout(new GridLayout(1,2));
+        buttons.setBounds(new Rectangle(10, 10));
+        buttons.setLayout(new GridLayout(1, 2));
 
         jlblTime = new JLabel("Current Time: ", SwingConstants.CENTER);
-        //jlblTime.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         jlblTime.setSize(40, 40);
         jlblTime.setBackground(new Color(59, 89, 182));
         jlblTime.setForeground(Color.WHITE);
 
         jlblDate = new JLabel("Current Date: ", SwingConstants.CENTER);
-        //jlblDate.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         jlblDate.setSize(40, 40);
         jlblDate.setBackground(new Color(59, 89, 182));
         jlblDate.setForeground(Color.WHITE);
 
         Date = new SimpleDateFormat("yyyy/MM/dd").format(new Date());
         jlblDate2 = new JLabel(Date, SwingConstants.CENTER);
-        //jlblDate2.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         jlblDate2.setSize(40, 40);
         jlblDate2.setBackground(new Color(59, 89, 182));
         jlblDate2.setForeground(Color.WHITE);
@@ -95,10 +94,11 @@ public class DeleteBook extends JFrame implements ActionListener
         jbtDeleteBook.setToolTipText("Click to delete book selected from list");
         jbtDeleteBook.setEnabled(false);
 
-        for(int i = 1; i <= bookCount; i++) {
+        for (int i = 1; i <= bookCount; i++) {
             Book book = db.getBook(i);
-            if(!book.getName().matches(""))
+            if (!book.getName().matches("")) {
                 Books.add(book.getName());
+            }
         }
         Collections.sort(Books);
 
@@ -123,43 +123,33 @@ public class DeleteBook extends JFrame implements ActionListener
         menu.add(listScroller);
         menu.add(buttons);
 
-        jbtBack.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mouseEntered(java.awt.event.MouseEvent evt)
-            {
+        jbtBack.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
                 jbtBack.setBackground(Color.BLACK);
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) 
-            {
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
                 jbtBack.setBackground(new Color(59, 89, 182));
             }
         });
 
-        jbtDeleteBook.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mouseEntered(java.awt.event.MouseEvent evt)
-            {
+        jbtDeleteBook.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
                 jbtDeleteBook.setBackground(Color.BLACK);
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) 
-            {
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
                 jbtDeleteBook.setBackground(new Color(59, 89, 182));
             }
         });
 
-        list.addListSelectionListener(new ListSelectionListener() 
-        {
-            public void valueChanged(ListSelectionEvent e) 
-            {
-                if (e.getValueIsAdjusting() == false)
-                {
-                    if (list.getSelectedIndex() == -1/* && choice ==-1*/)
-                    {
+        list.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting() == false) {
+                    if (list.getSelectedIndex() == -1/* && choice ==-1*/) {
                         //No selection.
                         jbtDeleteBook.setEnabled(false);
-                    }
-                    else 
-                    {
+                    } else {
                         //Selection.
                         jbtDeleteBook.setEnabled(true);
                         choice = list.getSelectedValue().toString();
@@ -170,26 +160,21 @@ public class DeleteBook extends JFrame implements ActionListener
 
         this.add(menu);
         this.pack();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
 
-    public void actionPerformed(ActionEvent ae) 
-    {	
+    public void actionPerformed(ActionEvent ae) {
         JButton source = (JButton) ae.getSource();
-        if(source.equals(jbtBack)) {
-            BookMenu bmenu = new BookMenu();
+        if (source.equals(jbtBack)) {
+            BookMenu bmenu = new BookMenu(userName);
             this.setVisible(false);
         }
-        if(source.equals(jbtDeleteBook)) {
+        if (source.equals(jbtDeleteBook)) {
             DeleteBookControl deleteBookObject = new DeleteBookControl();
             deleteBookObject.deleteBook(choice);
-            BookMenu bmenu = new BookMenu();
+            BookMenu bmenu = new BookMenu(userName);
             this.setVisible(false);
         }
-    }
-
-    public static void main(String args [])
-    {
-        DeleteBook dmenu = new DeleteBook();
     }
 }
