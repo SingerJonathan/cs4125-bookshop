@@ -1,64 +1,97 @@
 package Orders;
 
-public class Order
-{
-    private String date;
-    private String customerName;
+public class Order implements OrderInterface {
     private int orderID;
-    private String bookName;  
+    private int customerID;
+    private int bookID;
     private double price;
+    private String date;
+    private int processed;
+    private int cancelled;
+    private int returned;
+    private String returnReason;
 
-    public Order( String date, String customerName, int orderID, String bookName, double price)
+    public Order() {
+        
+    }
+    
+    public Order(int customerID, int bookID, double price, String date)
     {
+        this.orderID = 0;
+        this.customerID = customerID;
+        this.bookID = bookID;
+        this.price = price;
         this.date = date;
-        this.customerName = customerName;
-        this.orderID = orderID;
-        this.bookName = bookName;
-        this.price = price;//calulateDiscount(BookName,CName);
+        this.processed = 0;
+        this.cancelled = 0;
+        this.returned = 0;
+        this.returnReason = "";
     }
 
+    public Order(int orderID, int customerID, int bookID, double price, String date, int processed, int cancelled, int returned, String returnReason)
+    {
+        this.orderID = orderID;
+        this.customerID = customerID;
+        this.bookID = bookID;
+        this.price = price;//calulateDiscount(bookID,customerID);
+        this.date = date;
+        this.processed = processed;
+        this.cancelled = cancelled;
+        this.returned = returned;
+        this.returnReason = returnReason;
+    }
+
+    @Override
+    public int getID()
+    {
+        return this.orderID;
+    }
+
+    @Override
+    public int getCustomerID()
+    {
+        return this.customerID;
+    }
+
+    @Override
+    public int getBookID()
+    {
+        return this.bookID;
+    }
+
+    @Override
+    public double getPrice()
+    {
+        return this.price;
+    }
+
+    @Override
     public String getDate()
     {
         return this.date;
     }
 
-    public String getCName()
+    @Override
+    public int getProcessed()
     {
-        return this.customerName;
+        return this.processed;
     }
 
-    public int getOrderid()
+    @Override
+    public int getCancelled()
     {
-        return this.orderID;
+        return this.cancelled;
     }
 
-    public String getbookName()
+    @Override
+    public int getReturned()
     {
-        return this.bookName;
+        return this.returned;
     }
 
-    public double getprice()
+    @Override
+    public String getReturnReason()
     {
-        return this.price;
+        return this.returnReason;
     }
-
-    /*public double calulateDiscount(String bookName, String customerName)
-    {
-        int membership; //put customer level here
-        double bookPrice;
-        double discountedPrice;
-        // database code to get the customer level and book price
-
-        switch(membership) {
-            case 1: discountedPrice = bookPrice / 0.02;
-            break;
-            case 2: discountedPrice = bookPrice / 0.05;
-            break;
-            case 3: discountedPrice = bookPrice / 0.1;
-            break;		 
-            default: discountedPrice = bookPrice;
-            break;
-        }
-        return discountedPrice;
-    }*/ 
 }

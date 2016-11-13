@@ -1,27 +1,27 @@
 package StaffControls;
 
-import DBInterface.DBHandler;
 import Customers.Customer;
+import DBInterface.DBHandler;
 import DBInterface.DBHandlerFactory;
 import javax.swing.JOptionPane;
 
-public class CreateAccountControl extends StaffControls {
+public class EditCustomerControl extends StaffControls {
     
     @Override
-    public void createAccount(String name, String email, int memship) {
-        Customer customer = new Customer(name, email, memship);
+    public void editCustomer(int id, String name, String email, int membership) {
+        Customer customer = new Customer(name, email, membership);
         DBHandler db = DBHandlerFactory.getDBHandler("Staff");
-        db.insertCustomer(customer);
+        db.updateCustomer(id, customer);
         String memString = "";
-        switch (memship) {
+        switch (membership) {
             case 1:  memString = "bronze";      break;
             case 2:  memString = "silver";      break;
             case 3:  memString = "gold";        break;
             default: memString = "none";        break;
         }
-        JOptionPane.showMessageDialog(null, "Customer account created:\n" +
+        JOptionPane.showMessageDialog(null, "Customer account edited:\n" +
                                             "Name: "+name+"\n" +
                                             "Email: "+email+"\n" +
-                                            "Membership: "+memString, "Customer Account Created", JOptionPane.INFORMATION_MESSAGE);
+                                            "Membership: "+memString, "Customer Account Edited", JOptionPane.INFORMATION_MESSAGE);
     }
 }
